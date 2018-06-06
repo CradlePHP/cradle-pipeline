@@ -146,21 +146,21 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
         'maxRange' => null
     ];
 
-    // check if the user want's to display the total
-    if (isset($data['total'])) {
-        if (strpos($data['total'], ',') !== false) {
-            $data['total'] = explode(',', $data['total']);
+    $rangeFieldTypes = ['number', 'small', 'float', 'price'];
+    $fields = $data['schema']['fields'];
+
+    // check if the user wants to display the total
+    if (isset($data['range'])) {
+        if (strpos($data['range'], ',') !== false) {
+            $data['range'] = explode(',', $data['range']);
         }
 
         // if not array, make it an array
-        if (!is_array($data['total'])) {
-            $data['total'] = [$data['total']];
+        if (!is_array($data['range'])) {
+            $data['range'] = [$data['range']];
         }
 
-        $rangeFieldTypes = ['number', 'small', 'float', 'price'];
-
-        $fields = $data['schema']['fields'];
-        foreach ($data['total'] as $field) {
+        foreach ($data['range'] as $field) {
             if (isset($fields[$field])
                 && in_array($fields[$field]['field']['type'], $rangeFieldTypes)
             ) {
@@ -170,7 +170,7 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
             // flash error message
             $error = $this
                 ->package('global')
-                ->translate('%s is not a number type field', $value);
+                ->translate('%s is not a number type field', $field);
 
             $this
                 ->package('global')
@@ -180,6 +180,24 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
                 ->package('global')
                 ->redirect($redirect);
         }
+    }
+    
+    if (isset($data['total'])
+        && (!isset($fields[$data['total']])
+        || !in_array($fields[$data['total']]['field']['type'], $rangeFieldTypes))
+    ) {
+        // flash error message
+        $error = $this
+            ->package('global')
+            ->translate('%s is not a number type field', $data['total']);
+
+        $this
+            ->package('global')
+            ->flash($error, 'error');
+
+        $this
+            ->package('global')
+            ->redirect($redirect);
     }
 
     $data['schema']['filterable'] = array_values($data['schema']['filterable']);
