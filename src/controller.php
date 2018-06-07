@@ -72,6 +72,7 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
             ->package('global')
             ->translate($e->getMessage());
 
+        $redirect = '/admin/system/schema/search';
         $response->setError(true, $message);
     }
 
@@ -113,7 +114,7 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
     ) {
         $error = $this
             ->package('global')
-            ->translate('%s is not a select/radio field', $show);
+            ->translate('%s is not a select/radio field', $data['show']);
         $this
             ->package('global')
             ->flash($error, 'error');
@@ -181,7 +182,7 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
                 ->redirect($redirect);
         }
     }
-    
+
     if (isset($data['total'])
         && (!isset($fields[$data['total']])
         || !in_array($fields[$data['total']]['field']['type'], $rangeFieldTypes))
