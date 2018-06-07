@@ -72,10 +72,6 @@ class SqlService extends ModelService
                 $query->set($field, $value);
             }
 
-            if (isset($data['previous_column']) && $data['previous_column']) {
-                cradle()->inspect($query->getQuery());
-            }
-
             // we need to assign as we might end from here
             $results = $this->resource->query($query);
         }
