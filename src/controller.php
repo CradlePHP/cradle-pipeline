@@ -104,8 +104,6 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
 
     // minimize long array chain
     $fields = $data['schema']['fields'];
-    // pipeline stages
-    $data['stages'] = $fields[$data['show']]['field']['options'];
 
     $allowed = ['select', 'radios'];
 
@@ -122,6 +120,9 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
             ->package('global')
             ->redirect($redirect);
     }
+
+    // pipeline stages
+    $data['stages'] = $fields[$data['show']]['field']['options'];
 
     $dates = ['date', 'datetime', 'created', 'updated', 'time', 'week', 'month'];
     if (isset($data['date'])
