@@ -1,7 +1,7 @@
 {
     "name": "cradlephp/cradle-pipeline",
     "type": "cradle-package",
-    "description": "Profile Schema for CradlePHP",
+    "description": "Dynamic Pipeline for CradlePHP",
     "minimum-stability": "dev",
     "keywords": [
         "cradle",

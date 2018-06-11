@@ -35,6 +35,10 @@ $this->on('pipeline-update', function ($request, $response) {
 
     $schema = Schema::i($data['schema']);
 
+    if (isset($data['id'])) {
+        $data[$schema->getPrimaryFieldName()] = $data['id'];
+    }
+
     //
     // FIX: For import or in any part of the system
     // if primary is set but doesn't have a value.
@@ -48,7 +52,7 @@ $this->on('pipeline-update', function ($request, $response) {
     //----------------------------//
     // 2. Validate Data
     $errors = Validator::i($schema)
-        ->getCreateErrors($data);
+        ->getUpdateErrors($data);
 
     //if there are errors
     if (!empty($errors)) {

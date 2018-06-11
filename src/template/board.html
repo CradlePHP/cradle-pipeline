@@ -59,6 +59,7 @@
                 <div
                     class="column"
                     data-do="board"
+                    data-admin="{{../admin}}"
                     data-ajax-pull="{{../ajax.pull}}"
                     data-ajax-update="{{../ajax.update}}"
                     data-currency="{{../currency}}"
@@ -73,6 +74,11 @@
                     data-card-title="{{../schema.suggestion}}"
                     data-card-date="{{../date}}"
                     data-primary="{{../schema.primary}}"
+                    {{#each ../relations}}
+                        data-relations-name-{{@index}}="{{name}}"
+                        data-relations-title-{{@index}}="{{entitlement}}"
+                        data-relations-primary-{{@index}}="{{primary}}"
+                    {{/each}}
                 >
                     <div class="stage">
                         <div class="stage-label">

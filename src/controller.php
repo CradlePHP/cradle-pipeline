@@ -22,7 +22,6 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
     //----------------------------//
     // 1. Prepare Data
     $data = $request->getStage();
-
     // set redirect
     $redirect = sprintf(
         '/admin/system/model/%s/search',
@@ -202,6 +201,85 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
             ->redirect($redirect);
     }
 
+    if (isset($data['relations'])) {
+        $unrelated = [];
+        $one = [];
+
+        $data['relations'] = explode(',', $data['relations']);
+
+        if (isset($data['schema']['relations']) && $data['schema']['relations']) {
+            foreach ($data['schema']['relations'] as $key => $relation) {
+                $related[$relation['name']] = [
+                    'primary' => $relation['primary'],
+                    'relationship' => $relation['many'],
+                    'suggestion' => $relation['suggestion']
+                ];
+            }
+
+            $relatedNames = array_keys($related);
+            foreach ($data['relations'] as $key => $relation) {
+                if (!in_array($relation, $relatedNames)) {
+                    $unrelated[] = $relation;
+                    unset($data['relations'][$key]);
+                    continue;
+                }
+
+                if ($related[$relation]['relationship'] != '1') {
+                    $one[] = $relation;
+                    unset($data['relations'][$key]);
+                    continue;
+                }
+
+                $entitlement = $relation;
+
+                if ($related[$relation]['suggestion']) {
+                    $entitlement = str_replace('{', '', $related[$relation]['suggestion']);
+                    $entitlement = str_replace('}', '', $entitlement);
+                }
+
+                $data['relations'][$key] = [
+                    'name' => $relation,
+                    'entitlement' => $entitlement,
+                    'primary' => $related[$relation]['primary']
+                ];
+            }
+        } else {
+            $unrelated = $data['relations'];
+        }
+
+        $message = '';
+        if ($unrelated) {
+            $message .= $this
+                ->package('global')
+                ->translate(
+                    '%s has no relation with %s',
+                    $data['schema']['name'],
+                    implode(', ', $unrelated));
+        }
+
+        if ($unrelated && $one) {
+            $message .= ' and ';
+        }
+
+        if ($one) {
+            $message .= $this
+                ->package('global')
+                ->translate(
+                    '%s doesn\'t have a 1:1 relation with %s',
+                    implode(', ', $one),
+                    $data['schema']['name']);
+        }
+
+        if ($unrelated || $one) {
+            $response
+                ->setFlash($message, 'error');
+        }
+    }
+
+    if (strpos($redirect, '/admin') !== FALSE && strpos($redirect, '/admin') == 0) {
+        $data['admin'] = 1;
+    }
+
     $data['schema']['filterable'] = array_values($data['schema']['filterable']);
     //----------------------------//
     // 3. Render Template
@@ -242,6 +320,10 @@ $this->post('/admin/system/model/:schema/pipeline', function ($request, $respons
     }
 
     $filters = [];
+
+    if (!isset($data['moved']) && !isset($data['sort'])) {
+        return $this->trigger('pipeline-update', $request, $response);
+    }
 
     // if it reached here, then we're assumming
     // that the user attempted to do an order/sort update
