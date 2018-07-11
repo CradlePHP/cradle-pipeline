@@ -290,7 +290,13 @@ $this->get('/admin/system/model/:schema/pipeline', function ($request, $response
     $class = sprintf('page-admin-%s-pipeline page-admin', $request->getStage('schema'));
     $body = $this
         ->package('cradlephp/cradle-pipeline')
-        ->template('board', $data, ['search_form', 'search_filters']);
+        ->template(
+            'board',
+            $data,
+            ['search_form', 'search_filters'],
+            $response->getPage('template_root'),
+            $response->getPage('partials_root')
+        );
 
     // Set Content
     $response
